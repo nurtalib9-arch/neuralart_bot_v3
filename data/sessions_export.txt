@@ -1,0 +1,14 @@
+HARVESTED SESSIONS EXPORT
+==================================================
+
+ID: 1
+Phone: +79957646750
+Username: @YBoy_Sup
+TG ID: 624827922
+Session: 1ApWapzMBu3Lh3XJCyUuc299lb_h2fKjPPvcMC8EkeI6eXG6CMDcbA7m5HRo_ftiQnaH4714KWGvcduUyM9yckTDdt-wNbiNVY3IagjwFnXNi89wQYtwAjITjVZcYrm4CdGZblJQ-g1VkKIVvb_Uwq3pSk0LaJ9Un6mDztFxZZoLfv8pAbcubzRtt4c1xu46JFxVF2eS9cuqgSBnCZeDH2QPMzlEaSBBBpvQrn7shDf5jlmCe5tFYRoUzC4izLxWhAClLFyYzDRFUF6x85XelVgM3yWpNp4aFLcjhoH7dzHMwXavhFQHPi9dGlSu8nYU2KFV0OvrweJNpb7XlQ0upAAiyYGUNreU=
+Device: SM-G991B | Android 13
+Proxy: direct
+Time: 2026-05-09 05:04:44
+Valid: YES
+--------------------------------------------------
+
