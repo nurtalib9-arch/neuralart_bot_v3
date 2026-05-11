@@ -1,3 +1,6 @@
 # Format: socks5://user:pass@host:port
 # Or: socks5://host:port
 # Use MOBILE/RESIDENTIAL proxies only!
+
+
+socks5://UVBun2:syuEDnYDeR7A@bproxy.site:18081

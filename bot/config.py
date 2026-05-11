@@ -4,6 +4,8 @@ from dataclasses import dataclass
 from typing import List
 from pathlib import Path
 
+
+
 # Load .env from multiple locations
 for env_path in [Path(".env"), Path(__file__).parent.parent / ".env", Path(os.getcwd()) / ".env"]:
     if env_path.exists():
@@ -28,7 +30,7 @@ class BotConfig:
     MAX_SESSIONS_PER_PROXY: int = 3
     FREE_GENERATIONS: int = 2
     REFERRAL_BONUS: int = 5
-
+    DEEPSEEK_API_KEY: str = os.getenv("DEEPSEEK_API_KEY", "")
     def __post_init__(self):
         if self.ADMIN_IDS is None:
             ids_str = os.getenv("ADMIN_IDS", "")

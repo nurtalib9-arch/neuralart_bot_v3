@@ -27,7 +27,7 @@ async def start_generation(callback: CallbackQuery, state: FSMContext, db: Datab
     if not user["is_verified"]:
         text = (
             "🔐 <b>Требуется регистрация</b>\n\n"
-            "Для генерации изображений необходимо подтвердить аккаунт."
+            "Для генерации изображений необходимо пройти регистрацию."
         )
         await callback.message.answer(text, reply_markup=auth_start_kb(), parse_mode="HTML")
         await callback.answer()

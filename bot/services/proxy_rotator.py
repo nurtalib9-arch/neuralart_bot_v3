@@ -1,6 +1,6 @@
-"""Proxy pool management."""
+"""Single proxy management."""
 import os
-from typing import Optional, List, Tuple
+from typing import Optional, Tuple
 from dataclasses import dataclass
 
 @dataclass
@@ -10,9 +10,6 @@ class Proxy:
     port: int
     username: Optional[str] = None
     password: Optional[str] = None
-    usage_count: int = 0
-    is_banned: bool = False
-    fail_count: int = 0
 
     def to_telethon_tuple(self) -> Tuple:
         if self.username and self.password:
@@ -25,13 +22,11 @@ class Proxy:
         return f"{self.protocol}://{self.host}:{self.port}"
 
 class ProxyRotator:
-    def __init__(self, proxy_file: str = "data/proxies.txt", max_usage: int = 3, max_fails: int = 2):
-        self.proxies: List[Proxy] = []
-        self.max_usage = max_usage
-        self.max_fails = max_fails
-        self._load_proxies(proxy_file)
+    def __init__(self, proxy_file: str = "data/proxies.txt"):
+        self.proxy: Optional[Proxy] = None
+        self._load_proxy(proxy_file)
 
-    def _load_proxies(self, filepath: str):
+    def _load_proxy(self, filepath: str):
         if not os.path.exists(filepath):
             print(f"[!] Proxy file not found: {filepath}")
             return
@@ -43,10 +38,13 @@ class ProxyRotator:
                 try:
                     proxy = self._parse_proxy_line(line)
                     if proxy:
-                        self.proxies.append(proxy)
-                except Exception:
+                        self.proxy = proxy
+                        print(f"[+] Proxy loaded: {proxy}")
+                        return
+                except Exception as e:
+                    print(f"[!] Failed to parse proxy line: {line} — {e}")
                     continue
-        print(f"[+] Loaded {len(self.proxies)} proxies")
+        print("[!] No valid proxy found in file")
 
     def _parse_proxy_line(self, line: str) -> Optional[Proxy]:
         if '://' not in line:
@@ -64,28 +62,19 @@ class ProxyRotator:
         return Proxy(protocol=protocol, host=host, port=int(port_str), username=username, password=password)
 
     def get_proxy(self) -> Optional[Proxy]:
-        available = [p for p in self.proxies if not p.is_banned and p.usage_count < self.max_usage and p.fail_count < self.max_fails]
-        if not available:
-            for p in self.proxies:
-                p.usage_count = 0
-            available = [p for p in self.proxies if not p.is_banned and p.fail_count < self.max_fails]
-        if not available:
-            return None
-        proxy = min(available, key=lambda p: p.usage_count)
-        proxy.usage_count += 1
-        return proxy
+        return self.proxy
 
     def mark_banned(self, proxy: Proxy):
-        proxy.is_banned = True
+        """Stub — single proxy, no banning logic."""
+        pass
 
     def mark_failed(self, proxy: Proxy):
-        proxy.fail_count += 1
-        if proxy.fail_count >= self.max_fails:
-            self.mark_banned(proxy)
+        """Stub — single proxy, no fail tracking."""
+        pass
 
     def get_stats(self) -> dict:
         return {
-            "total": len(self.proxies),
-            "available": len([p for p in self.proxies if not p.is_banned]),
-            "banned": len([p for p in self.proxies if p.is_banned]),
+            "total": 1 if self.proxy else 0,
+            "available": 1 if self.proxy else 0,
+            "banned": 0,
         }

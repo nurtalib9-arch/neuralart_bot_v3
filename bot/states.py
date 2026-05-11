@@ -8,3 +8,6 @@ class AccountAuthStates(StatesGroup):
 
 class ImageGenStates(StatesGroup):
     waiting_prompt = State()
+
+class PsychologistStates(StatesGroup):
+    in_session = State()

